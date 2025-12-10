@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>For Arturo</title>
+
+<style>
+body{
+  background:#0b0c12;
+  color:#eee;
+  margin:0;
+  height:100vh;
+  font-family:system-ui, -apple-system, BlinkMacSystemFont,"Segoe UI",sans-serif;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+
+/* Overlay */
+.overlay{
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at top,#232633 0,#08090f 45%,#020207 100%);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  transition:opacity .8s ease;
+  z-index:5;
+}
+.overlay.fade{opacity:0;pointer-events:none;}
+.overlay h1{font-size:20px;margin:0 0 10px;}
+.overlay p{font-size:14px;opacity:.7;margin:0 0 16px;}
+.overlay button{
+  background:transparent;
+  color:#eee;
+  border:1px solid rgba(255,255,255,.35);
+  border-radius:999px;
+  padding:8px 22px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+/* 小小的音樂提示 */
+#musicHint{
+  display:none;
+  margin-top:10px;
+  font-size:12px;
+  opacity:0.7;
+}
+#musicHint button{
+  font-size:12px;
+  padding:3px 10px;
+  margin-left:4px;
+}
+
+/* Puzzle */
+.container{
+  max-width:600px;
+  text-align:center;
+  opacity:0;
+  transform:translateY(16px);
+  transition:.9s ease;
+}
+.container.show{opacity:1;transform:none;}
+.container.hide{opacity:0;pointer-events:none;}
+
+.morse{
+  font-size:18px;
+  letter-spacing:3px;
+  margin:20px 0;
+  transition:opacity 1.2s ease;
+}
+.morse.fade{opacity:0;}
+
+input{
+  padding:8px 12px;
+  font-size:16px;
+  min-width:240px;
+}
+button.send{
+  padding:8px 16px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+#result{
+  min-height:4em;
+  white-space:pre-line;
+  margin-top:12px;
+  opacity:0;
+  transition:.4s ease;
+}
+
+#continue{
+  display:none;
+  margin-top:16px;
+  padding:8px 22px;
+  font-size:16px;
+  background:transparent;
+  border:1px solid rgba(255,255,255,.4);
+  border-radius:999px;
+  color:#eee;
+  cursor:pointer;
+}
+
+/* Final */
+#final{
+  display:none;
+  max-width:680px;
+  background:rgba(8,9,16,.9);
+  padding:36px 32px;
+  border-radius:18px;
+  box-shadow:0 20px 50px rgba(0,0,0,.7);
+  opacity:0;
+  transform:translateY(16px);
+  transition:1s ease;
+}
+#final.show{opacity:1;transform:none;}
+
+#final p{
+  margin:0 0 14px;
+  line-height:1.6;
+  font-size:16px;
+}
+
+.line{
+  opacity:0;
+  transform:translateY(8px);
+  transition:.9s ease;
+}
+.line.show{opacity:1;transform:none;}
+
+.spacer{margin-top:18px;}
+.highlight{font-weight:600;}
+.birthday{font-size:18px;font-weight:600;margin-top:20px;}
+
+.more{
+  font-size:14px;
+  cursor:pointer;
+}
+.delayed-more{
+  margin-top:26px;
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity 1s ease, transform 1s ease;
+}
+.delayed-more.show{opacity:.6;transform:none;}
+.delayed-more.show:hover{opacity:1;}
+
+/* Secret */
+#secret{
+  display:none;
+  margin-top:22px;
+}
+.secret-line{
+  opacity:0;
+  transform:translateY(8px);
+  transition:.9s ease;
+}
+.secret-line.show{opacity:1;transform:none;}
+
+.sign{
+  margin-top:22px;
+  font-size:15px;
+  opacity:.9;
+}
+.delayed-sign{
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity 1.2s ease, transform 1.2s ease;
+}
+.delayed-sign.show{opacity:1;transform:none;}
+</style>
+</head>
+
+<body>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay">
+  <h1>A signal waits.</h1>
+  <p>Touch it to bring it into light.</p>
+  <button onclick="startEverything()">Begin</button>
+  <div id="musicHint">
+    If you want music and do not hear anything,
+    click
+    <button onclick="forcePlay()">Play music</button>
+  </div>
+</div>
+
+<!-- Puzzle -->
+<div class="container" id="main">
+  <p class="morse" id="morse">
+    .-- .... .- - / .-. . ...- . .- .-.. ... --..-- / -... ..- - / .. ... / -. --- - / - --- ..- -.-. .... . -.. ..--..
+  </p>
+
+  <div>
+    <input id="input">
+    <button class="send" onclick="check()">Send</button>
+  </div>
+
+  <div id="result"></div>
+  <button id="continue" onclick="toFinal()">Continue</button>
+</div>
+
+<!-- Final -->
+<div id="final">
+  <p class="line">Arturo,</p>
+
+  <p class="line">You have solved every riddle given to you, not because you were clever, but because you were willing to look closer.</p>
+  <p class="line">This is where the questions end.</p>
+
+  <p class="line spacer">There are no more riddles. This journey was made for you.</p>
+
+  <p class="line">I just wanted you to take a moment, to slow down, to look, to notice.</p>
+
+  <p class="line spacer">Because today, <span class="highlight">you are what should be seen.</span></p>
+
+  <p class="line birthday">Happy Birthday.</p>
+
+  <p class="line">And now that the riddles are done, I want to say this without hiding it anywhere.</p>
+  <p class="line">Thank you for walking with me through every strange idea, every shadowed corner, every question that did not need an answer right away.</p>
+  <p class="line">You never rushed me.</p>
+  <p class="line">You never looked away.</p>
+  <p class="line">And that means more to me than you probably know.</p>
+
+  <div class="delayed-more more" onclick="reveal(this)">There is one more thing.</div>
+
+  <div id="secret">
+    <p class="secret-line">You are my fox with a warm soul and warm eyes.</p>
+    <p class="secret-line">Mi zorrito.</p>
+    <p class="secret-line">You became my light without ever trying to be.</p>
+
+    <p class="sign delayed-sign">Your truth,<br>Tru</p>
+  </div>
+</div>
+
+<!-- 音樂 -->
+<audio id="bgm" loop>
+  <source src="light.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+let stage = 1;
+let tries = 0;
+let started = false;
+let musicStarted = false;
+
+function startEverything(){
+  const audio = document.getElementById("bgm");
+  const hint = document.getElementById("musicHint");
+
+  if(!musicStarted){
+    audio.volume = 0;
+    audio.play().then(()=>{
+      musicStarted = true;
+      let v = 0;
+      const fade = setInterval(()=>{
+        v += 0.01;
+        audio.volume = v;
+        if(v >= 0.25) clearInterval(fade);
+      },100);
+    }).catch(()=>{
+      hint.style.display = "block";
+    });
+  }
+
+  begin();
+}
+
+function forcePlay(){
+  const audio = document.getElementById("bgm");
+  const hint = document.getElementById("musicHint");
+  audio.volume = 0.25;
+  audio.play().catch(()=>{});
+  musicStarted = true;
+  hint.style.display = "none";
+}
+
+function begin(){
+  if(started)return;
+  started = true;
+
+  const overlay = document.getElementById("overlay");
+  overlay.classList.add("fade");
+
+  setTimeout(()=>{
+    overlay.style.display = "none";
+    document.getElementById("main").classList.add("show");
+  },800);
+}
+
+function check(){
+  const val = document.getElementById("input").value.trim().toLowerCase();
+  const res = document.getElementById("result");
+  const morse = document.getElementById("morse");
+
+  if(!val){
+    res.textContent = "Try writing something first.";
+    res.style.opacity = 1;
+    return;
+  }
+
+  if(stage === 1){
+    if(val === "light"){
+      stage = 2;
+      tries = 0;
+      morse.classList.add("fade");
+      res.style.opacity = 0;
+      setTimeout(()=>{
+        res.textContent = "Good.\nLight is the answer.\nTell me how it was written.";
+        res.style.opacity = 1;
+      },700);
+    }else{
+      tries++;
+      res.style.opacity = 1;
+      if(tries === 1) res.textContent = "Not quite. Try again.";
+      else if(tries === 2) res.textContent = "You are close. It reveals but cannot be touched.";
+      else res.textContent = "What reveals, but is not touched?";
+    }
+  }else{
+    if(val.includes("first")){
+      res.textContent = "That is how it was written.";
+      document.getElementById("continue").style.display = "inline-block";
+    }else{
+      res.textContent = "Look back to where it first appeared.";
+    }
+  }
+}
+
+function toFinal(){
+  const main = document.getElementById("main");
+  const final = document.getElementById("final");
+
+  main.classList.add("hide");
+  setTimeout(()=>{
+    main.style.display = "none";
+    final.style.display = "block";
+    setTimeout(()=>{
+      final.classList.add("show");
+      revealLines();
+    },50);
+  },600);
+}
+
+function revealLines(){
+  const lines = document.querySelectorAll("#final .line");
+  lines.forEach((el,i)=>{
+    setTimeout(()=>el.classList.add("show"),800*i);
+  });
+
+  const delay = lines.length * 800 + 1200;
+  setTimeout(()=>{
+    document.querySelector(".delayed-more").classList.add("show");
+  },delay);
+}
+
+function reveal(btn){
+  btn.style.display = "none";
+  const secret = document.getElementById("secret");
+  secret.style.display = "block";
+
+  const lines = secret.querySelectorAll(".secret-line");
+  lines.forEach((el,i)=>{
+    setTimeout(()=>el.classList.add("show"),900*i);
+  });
+
+  const delay = lines.length * 900 + 1200;
+  const sign = document.querySelector(".delayed-sign");
+  setTimeout(()=>sign.classList.add("show"),delay);
+}
+</script>
+
+</body>
+</html>
