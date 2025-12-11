@@ -161,20 +161,29 @@ button.send{
 }
 .delayed-sign.show{opacity:1;transform:none;}
 
-/* 小小音樂播放器放右下角 */
-.player{
+/* 美觀版播放按鈕 B */
+#musicButton{
   position:fixed;
-  right:12px;
-  bottom:10px;
-  font-size:11px;
-  opacity:0.7;
+  right:16px;
+  bottom:16px;
+  padding:6px 16px;
+  border-radius:999px;
+  border:1px solid rgba(255,255,255,0.6);
+  font-size:13px;
+  color:rgba(255,255,255,0.8);
+  cursor:pointer;
+  background:rgba(5,6,12,0.7);
+  backdrop-filter:blur(6px);
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.15s ease;
 }
-.player span{
-  display:block;
-  margin-bottom:2px;
-}
-.player audio{
-  width:180px;
+#musicButton:hover{
+  color:#fff;
+  border-color:#fff;
+  transform:translateY(-1px);
 }
 </style>
 </head>
@@ -235,13 +244,9 @@ button.send{
   </div>
 </div>
 
-<!-- 右下角音樂播放器，要音樂就按播放 -->
-<div class="player">
-  <span>music for the journey</span>
-  <audio controls loop>
-    <source src="light.mp3" type="audio/mpeg">
-  </audio>
-</div>
+<!-- 播放按鈕 -->
+<div id="musicButton">play music</div>
+<audio id="bgm" src="light.mp3" loop></audio>
 
 <script>
 let stage = 1;
@@ -340,6 +345,23 @@ function reveal(btn){
   const sign = document.querySelector(".delayed-sign");
   setTimeout(()=>sign.classList.add("show"),delay);
 }
+
+/* 播放按鈕控制 */
+const bgm = document.getElementById("bgm");
+const btn = document.getElementById("musicButton");
+let playing = false;
+
+btn.addEventListener("click",()=>{
+  if(!playing){
+    bgm.play().catch(()=>{});
+    btn.textContent="pause";
+    playing=true;
+  }else{
+    bgm.pause();
+    btn.textContent="play music";
+    playing=false;
+  }
+});
 </script>
 
 </body>
