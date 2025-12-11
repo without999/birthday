@@ -32,7 +32,7 @@ body{
 }
 .overlay.fade{opacity:0;pointer-events:none;}
 .overlay h1{font-size:20px;margin:0 0 10px;}
-.overlay p{font-size:14px;opacity:.7;margin:0 0 16px;}
+.overlay p{font-size:14px;opacity:.7;margin:0 0 24px;}
 .overlay button{
   background:transparent;
   color:#eee;
@@ -41,19 +41,6 @@ body{
   padding:8px 22px;
   font-size:16px;
   cursor:pointer;
-}
-
-/* 小小的音樂提示 */
-#musicHint{
-  display:none;
-  margin-top:10px;
-  font-size:12px;
-  opacity:0.7;
-}
-#musicHint button{
-  font-size:12px;
-  padding:3px 10px;
-  margin-left:4px;
 }
 
 /* Puzzle */
@@ -173,6 +160,22 @@ button.send{
   transition:opacity 1.2s ease, transform 1.2s ease;
 }
 .delayed-sign.show{opacity:1;transform:none;}
+
+/* 小小音樂播放器放右下角 */
+.player{
+  position:fixed;
+  right:12px;
+  bottom:10px;
+  font-size:11px;
+  opacity:0.7;
+}
+.player span{
+  display:block;
+  margin-bottom:2px;
+}
+.player audio{
+  width:180px;
+}
 </style>
 </head>
 
@@ -182,12 +185,7 @@ button.send{
 <div class="overlay" id="overlay">
   <h1>A signal waits.</h1>
   <p>Touch it to bring it into light.</p>
-  <button onclick="startEverything()">Begin</button>
-  <div id="musicHint">
-    If you want music and do not hear anything,
-    click
-    <button onclick="forcePlay()">Play music</button>
-  </div>
+  <button onclick="begin()">Begin</button>
 </div>
 
 <!-- Puzzle -->
@@ -237,50 +235,21 @@ button.send{
   </div>
 </div>
 
-<!-- 音樂 -->
-<audio id="bgm" loop>
-  <source src="light.mp3" type="audio/mpeg">
-</audio>
+<!-- 右下角音樂播放器，要音樂就按播放 -->
+<div class="player">
+  <span>music for the journey</span>
+  <audio controls loop>
+    <source src="light.mp3" type="audio/mpeg">
+  </audio>
+</div>
 
 <script>
 let stage = 1;
 let tries = 0;
 let started = false;
-let musicStarted = false;
-
-function startEverything(){
-  const audio = document.getElementById("bgm");
-  const hint = document.getElementById("musicHint");
-
-  if(!musicStarted){
-    audio.volume = 0;
-    audio.play().then(()=>{
-      musicStarted = true;
-      let v = 0;
-      const fade = setInterval(()=>{
-        v += 0.01;
-        audio.volume = v;
-        if(v >= 0.25) clearInterval(fade);
-      },100);
-    }).catch(()=>{
-      hint.style.display = "block";
-    });
-  }
-
-  begin();
-}
-
-function forcePlay(){
-  const audio = document.getElementById("bgm");
-  const hint = document.getElementById("musicHint");
-  audio.volume = 0.25;
-  audio.play().catch(()=>{});
-  musicStarted = true;
-  hint.style.display = "none";
-}
 
 function begin(){
-  if(started)return;
+  if(started) return;
   started = true;
 
   const overlay = document.getElementById("overlay");
